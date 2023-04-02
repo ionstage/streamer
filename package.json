@@ -5,6 +5,7 @@
     "test": "mocha"
   },
   "devDependencies": {
+    "esbuild": "^0.17.15",
     "eslint": "^8.36.0",
     "mocha": "^10.2.0"
   },
