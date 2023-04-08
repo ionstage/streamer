@@ -1,6 +1,7 @@
 {
   "name": "playbuild",
   "version": "",
+  "type": "module",
   "scripts": {
     "test": "mocha"
   },
