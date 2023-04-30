@@ -3,4 +3,6 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-touch-callout: none;
   margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
 }
