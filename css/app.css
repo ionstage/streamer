@@ -2,6 +2,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   -webkit-touch-callout: none;
+  color: #212121;
   font-family: Helvetica, Arial, sans-serif;
   margin: 0;
   pointer-events: none;
