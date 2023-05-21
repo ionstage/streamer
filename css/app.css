@@ -1,6 +1,9 @@
 body {
   -webkit-text-size-adjust: 100%;
+  margin: 0;
+}
+
+.main {
   color: #212121;
   font-family: Helvetica, Arial, sans-serif;
-  margin: 0;
 }
