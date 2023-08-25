@@ -1,9 +1,6 @@
 {
-  "name": "playbuild",
-  "version": "",
   "devDependencies": {
     "eslint": "^8.47.0",
     "mocha": "^10.2.0"
-  },
-  "private": true
+  }
 }
