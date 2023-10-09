@@ -7,3 +7,13 @@ export class Content {
     this._component = value;
   }
 }
+
+export class ContentComponent {
+  constructor() {
+    this._delegate = null;
+  }
+
+  set delegate(value) {
+    this._delegate = value;
+  }
+}
