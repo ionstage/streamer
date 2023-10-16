@@ -17,3 +17,5 @@ export class ContentComponent {
     this._delegate = value;
   }
 }
+
+export class ContentComponentDelegate { /* TODO */ }
