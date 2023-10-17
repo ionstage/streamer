@@ -4,6 +4,7 @@ export class Content {
   }
 
   set component(value) {
+    value.delegate = new ContentComponentDelegateImpl(this);
     this._component = value;
   }
 }
@@ -19,3 +20,10 @@ export class ContentComponent {
 }
 
 export class ContentComponentDelegate { /* TODO */ }
+
+class ContentComponentDelegateImpl extends ContentComponentDelegate {
+  constructor(content) {
+    super();
+    this._content = content;
+  }
+}
