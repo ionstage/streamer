@@ -1,5 +1,6 @@
 export class Content {
   constructor() {
+    this._objects = [];
     this._component = null;
   }
 
