@@ -8,6 +8,8 @@ export class Content {
     value.delegate = new ContentComponentDelegateImpl(this);
     this._component = value;
   }
+
+  start() { /* TODO */ }
 }
 
 export class ContentComponent {
