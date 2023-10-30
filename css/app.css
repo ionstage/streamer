@@ -5,6 +5,7 @@ html {
 body {
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
+  -webkit-touch-callout: none;
   background-color: #fafafa;
   color: #212121;
   cursor: default;
