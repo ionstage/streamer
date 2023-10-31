@@ -11,6 +11,8 @@ body {
   cursor: default;
   font-family: Helvetica, Arial, sans-serif;
   margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .content {
