@@ -1,20 +1,24 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+
+	"github.com/peterh/liner"
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
+	line := liner.NewLiner()
+	defer line.Close()
 
-	for scanner.Scan() {
-		t := scanner.Text()
-		fmt.Println(t)
-	}
+	line.SetCtrlCAborts(true)
 
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	for {
+		prompt := "> "
+		l, err := line.Prompt(prompt)
+		if err != nil {
+			break
+		}
+		line.AppendHistory(l)
+		fmt.Println(l)
 	}
 }
