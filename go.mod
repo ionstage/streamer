@@ -2,7 +2,10 @@ module github.com/ionstage/streamer
 
 go 1.21.4
 
-require github.com/peterh/liner v1.2.2
+require (
+	github.com/mattn/go-shellwords v1.0.12
+	github.com/peterh/liner v1.2.2
+)
 
 require (
 	github.com/mattn/go-runewidth v0.0.3 // indirect

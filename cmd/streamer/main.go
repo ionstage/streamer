@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/mattn/go-shellwords"
 	"github.com/peterh/liner"
 )
 
@@ -19,6 +21,14 @@ func main() {
 			break
 		}
 		line.AppendHistory(l)
+		args, err := shellwords.Parse(l)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			continue
+		}
+		if len(args) == 0 {
+			continue
+		}
 		fmt.Println(l)
 	}
 }
