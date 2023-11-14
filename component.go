@@ -1,7 +1,11 @@
 package streamer
 
 type Port struct {
-	/* TODO */
+	c chan []byte
+}
+
+func NewPort() *Port {
+	return &Port{c: make(chan []byte)}
 }
 
 type Component struct {
