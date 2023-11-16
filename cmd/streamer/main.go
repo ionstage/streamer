@@ -8,6 +8,12 @@ import (
 	"github.com/peterh/liner"
 )
 
+func handle(args []string) error {
+	/* TODO */
+	fmt.Println(args)
+	return nil
+}
+
 func main() {
 	line := liner.NewLiner()
 	defer line.Close()
@@ -29,6 +35,6 @@ func main() {
 		if len(args) == 0 {
 			continue
 		}
-		fmt.Println(l)
+		handle(args)
 	}
 }
