@@ -3,6 +3,7 @@ body {
   -webkit-touch-callout: none;
   color: #212121;
   cursor: default;
+  font-family: Helvetica, Arial, sans-serif;
   margin: 0;
   overflow: hidden;
   -webkit-user-select: none;
