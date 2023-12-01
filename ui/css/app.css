@@ -9,3 +9,10 @@ body {
   -webkit-user-select: none;
   user-select: none;
 }
+
+.sidebar {
+  border-right: 1px solid #e0e0e0;
+  height: 100%;
+  position: fixed;
+  width: 279px;
+}
