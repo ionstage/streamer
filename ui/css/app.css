@@ -16,3 +16,12 @@ body {
   position: fixed;
   width: 279px;
 }
+
+.content {
+  box-sizing: border-box;
+  height: 100%;
+  padding-left: 280px;
+  pointer-events: none;
+  position: fixed;
+  width: 100%;
+}
