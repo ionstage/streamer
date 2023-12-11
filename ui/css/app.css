@@ -38,7 +38,7 @@ body {
   font-size: 14px;
   height: 100%;
   outline: 0;
-  padding: 1px 4px 1px 6px;
+  padding: 1px 6px;
   touch-action: manipulation;
   width: 100%;
 }
@@ -48,6 +48,7 @@ body {
   box-shadow: 0 0 1px #42a5f5;
 }
 
+.search-input::-webkit-search-cancel-button,
 .search-input::-webkit-search-decoration {
   display: none;
 }
