@@ -33,6 +33,18 @@ body {
   width: 100%;
 }
 
+.search-icon {
+  background-image: url('../images/magnifying-glass.svg');
+  background-origin: content-box;
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+  height: 31px;
+  padding: 8px;
+  pointer-events: none;
+  position: absolute;
+  width: 31px;
+}
+
 .search-input {
   appearance: none;
   border: 1px solid #bdbdbd;
@@ -42,7 +54,7 @@ body {
   font-size: 14px;
   height: 100%;
   outline: 0;
-  padding: 1px 27px 1px 6px;
+  padding: 1px 27px 1px 28px;
   touch-action: manipulation;
   width: 100%;
 }
