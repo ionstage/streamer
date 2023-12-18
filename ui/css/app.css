@@ -83,12 +83,17 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   border: 0;
+  border-radius: 8px;
   height: 31px;
   padding: 8px;
   position: absolute;
   right: 8px;
   touch-action: manipulation;
   width: 28px;
+}
+
+.search-clear:active {
+  opacity: .6;
 }
 
 .main {
