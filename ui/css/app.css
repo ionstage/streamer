@@ -96,6 +96,10 @@ body {
   opacity: .6;
 }
 
+.search-input:placeholder-shown + .search-clear {
+  display: none;
+}
+
 .main {
   display: grid;
   grid-template-rows: 48px auto;
