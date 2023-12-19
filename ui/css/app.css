@@ -26,8 +26,6 @@ body {
 }
 
 .search {
-  box-sizing: border-box;
-  height: 100%;
   padding: 8px;
   position: relative;
   width: 100%;
@@ -53,7 +51,7 @@ body {
   color: inherit;
   font: inherit;
   font-size: 14px;
-  height: 100%;
+  height: 31px;
   outline: 0;
   padding: 1px 27px 1px 28px;
   touch-action: manipulation;
