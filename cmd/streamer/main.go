@@ -35,6 +35,9 @@ func main() {
 		if len(args) == 0 {
 			continue
 		}
-		handle(args)
+		err = handle(args)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}
 }
