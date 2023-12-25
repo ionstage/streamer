@@ -143,3 +143,7 @@ body {
 .sidebar-toggle-button:checked {
   background-image: url('../images/angle-right.svg');
 }
+
+.node {
+  position: absolute;
+}
