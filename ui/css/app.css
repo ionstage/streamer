@@ -144,6 +144,10 @@ body {
   background-image: url('../images/angle-right.svg');
 }
 
+.main-content {
+  position: relative;
+}
+
 .node {
   position: absolute;
 }
