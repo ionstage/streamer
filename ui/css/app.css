@@ -100,7 +100,6 @@ body {
 .main {
   display: grid;
   grid-template-rows: 48px auto;
-  pointer-events: none;
 }
 
 .main-header {
@@ -132,7 +131,6 @@ body {
   height: 31px;
   margin: 0;
   padding: 6px;
-  pointer-events: auto;
   width: 31px;
 }
 
@@ -145,6 +143,7 @@ body {
 }
 
 .main-content {
+  overflow: auto;
   position: relative;
 }
 
