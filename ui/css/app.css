@@ -165,10 +165,28 @@ body {
   color: #9e9e9e;
   line-height: 30px;
   overflow: hidden;
-  padding: 0 7px;
+  padding: 0 12px;
   position: absolute;
   text-overflow: ellipsis;
   width: 100%;
+}
+
+.node-port {
+  height: 16px;
+  padding: 4px;
+  position: absolute;
+  right: 0;
+  width: 16px;
+}
+
+.node-port.left {
+  left: -12.5px;
+  top: 3px;
+}
+
+.node-port.right {
+  right: -12.5px;
+  top: 3px;
 }
 
 .node-content {
