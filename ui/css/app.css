@@ -173,20 +173,19 @@ body {
 
 .node-port {
   height: 16px;
-  padding: 4px;
   position: absolute;
   right: 0;
   width: 16px;
 }
 
 .node-port.left {
-  left: -12.5px;
-  top: 3px;
+  left: -8.5px;
+  top: 7px;
 }
 
 .node-port.right {
-  right: -12.5px;
-  top: 3px;
+  right: -8.5px;
+  top: 7px;
 }
 
 .node-content {
