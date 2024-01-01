@@ -207,9 +207,8 @@ body {
 
 .link-handle {
   height: 16px;
-  left: -12px;
-  padding: 4px;
+  left: -8px;
   position: absolute;
-  top:-12px;
+  top: -8px;
   width: 16px;
 }
