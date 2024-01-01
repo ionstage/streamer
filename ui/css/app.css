@@ -196,3 +196,21 @@ body {
   border-top: 0;
   overflow: hidden;
 }
+
+.link {
+  position: absolute;
+}
+
+.link-line {
+  overflow: visible;
+  position: absolute;
+}
+
+.link-handle {
+  height: 16px;
+  left: -12px;
+  padding: 4px;
+  position: absolute;
+  top:-12px;
+  width: 16px;
+}
