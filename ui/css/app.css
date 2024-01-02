@@ -172,20 +172,21 @@ body {
 }
 
 .node-port {
-  height: 16px;
+  background-color: #bdbdbd;
+  border-radius: 7px;
+  height: 14px;
   position: absolute;
-  right: 0;
-  width: 16px;
+  width: 14px;
 }
 
 .node-port.left {
-  left: -8.5px;
-  top: 7px;
+  left: -7.5px;
+  top: 8px;
 }
 
 .node-port.right {
-  right: -8.5px;
-  top: 7px;
+  right: -7.5px;
+  top: 8px;
 }
 
 .node-content {
