@@ -227,9 +227,11 @@ body {
 }
 
 .link-handle {
-  height: 16px;
-  left: -8px;
+  background-color: #bdbdbd;
+  border-radius: 7px;
+  height: 14px;
+  left: -7px;
   position: absolute;
-  top: -8px;
-  width: 16px;
+  top: -7px;
+  width: 14px;
 }
