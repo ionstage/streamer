@@ -242,3 +242,16 @@ body {
   top: -7px;
   width: 14px;
 }
+
+.link-outline {
+  overflow: visible;
+  position: absolute;
+  z-index: -1;
+}
+
+.link-outline > .link-handle {
+  border: 2px solid #42a5f5;
+  border-radius: 9px;
+  left: -9px;
+  top: -9px;
+}
