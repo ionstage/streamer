@@ -198,12 +198,17 @@ body {
 .node-outline {
   border: 2px solid #42a5f5;
   border-radius: 10px;
+  display: none;
   height: 100%;
   left: -2px;
   position: absolute;
   top: -2px;
   width: 100%;
   z-index: -1;
+}
+
+.node.selected > .node-outline {
+  display: block;
 }
 
 .node-outline > .node-port {
@@ -243,9 +248,14 @@ body {
 }
 
 .link-outline {
+  display: none;
   overflow: visible;
   position: absolute;
   z-index: -1;
+}
+
+.link.selected > .link-outline {
+  display: block;
 }
 
 .link-outline > .link-handle {
