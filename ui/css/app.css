@@ -122,7 +122,7 @@ body {
 
 .sidebar-toggle-button {
   appearance: none;
-  background-image: url('../images/angle-left.svg');
+  background-image: url('../images/bars.svg');
   background-origin: content-box;
   background-position: center;
   background-repeat: no-repeat;
@@ -137,7 +137,7 @@ body {
 }
 
 .sidebar-toggle-button:checked {
-  background-image: url('../images/angle-right.svg');
+  background-color: #e0e0e0;
 }
 
 .main-content {
