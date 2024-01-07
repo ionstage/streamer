@@ -195,6 +195,11 @@ body {
   overflow: hidden;
 }
 
+.node-component {
+  height: 100%;
+  width: 100%;
+}
+
 .node-outline {
   border: 2px solid #42a5f5;
   border-radius: 10px;
