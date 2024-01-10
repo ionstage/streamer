@@ -9,7 +9,7 @@ func NewPort() *Port {
 }
 
 type Component struct {
-	inputPorts  []Port
-	outputPorts []Port
-	errorPorts  []Port
+	inputPort  Port
+	outputPort Port
+	errorPort  Port
 }
