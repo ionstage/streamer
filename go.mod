@@ -1,6 +1,6 @@
 module github.com/ionstage/streamer
 
-go 1.21.4
+go 1.21.6
 
 require (
 	github.com/mattn/go-shellwords v1.0.12
