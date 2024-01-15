@@ -117,7 +117,7 @@ func handleSender() {
 				n, err := in.Read(buf)
 				if n > 0 {
 					b := buf[0:n]
-					err = c.WriteMessage(websocket.BinaryMessage, b)
+					err := c.WriteMessage(websocket.BinaryMessage, b)
 					if err != nil {
 						fmt.Fprintln(os.Stderr, err)
 						break
@@ -134,7 +134,7 @@ func handleSender() {
 			for scanner.Scan() {
 				s := scanner.Text()
 				b := unsafe.Slice(unsafe.StringData(s), len(s))
-				err = c.WriteMessage(websocket.TextMessage, b)
+				err := c.WriteMessage(websocket.TextMessage, b)
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					break
