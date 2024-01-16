@@ -17,8 +17,8 @@ import (
 )
 
 var port = flag.Int("p", 8080, "destination port number")
-var listen = flag.Bool("l", false, "listen mode")
-var binary = flag.Bool("b", false, "binary data transfer")
+var isClient = flag.Bool("c", false, "client mode")
+var isBinary = flag.Bool("b", false, "binary data transfer")
 
 var upgrader = &websocket.Upgrader{
 	ReadBufferSize:  4096,
@@ -42,7 +42,7 @@ func server(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintln(os.Stderr, err)
 				break
 			}
-			if *binary {
+			if *isBinary {
 				os.Stdout.Write(msg)
 			} else {
 				fmt.Fprintln(os.Stdout, string(msg))
@@ -110,7 +110,7 @@ func handleSender() {
 			case <-time.After(time.Second):
 			}
 		}()
-		if *binary {
+		if *isBinary {
 			in := bufio.NewReader(os.Stdin)
 			buf := make([]byte, upgrader.WriteBufferSize)
 			for {
@@ -161,9 +161,9 @@ func handleSender() {
 func main() {
 	flag.Parse()
 
-	if *listen {
-		handleListener()
-	} else {
+	if *isClient {
 		handleSender()
+	} else {
+		handleListener()
 	}
 }
