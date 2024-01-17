@@ -153,7 +153,7 @@ func (h *streamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func handleServer() {
 	handler := newStreamHandler()
 	go handler.run()
-	http.Handle("/ws", handler)
+	http.Handle("/_streamer", handler)
 	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }
@@ -181,7 +181,7 @@ func handleClient() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	u := url.URL{Scheme: "ws", Host: "localhost:" + strconv.Itoa(*port), Path: "/ws"}
+	u := url.URL{Scheme: "ws", Host: "localhost:" + strconv.Itoa(*port), Path: "/_streamer"}
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
