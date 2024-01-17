@@ -196,9 +196,14 @@ func handleClient() {
 	go func() {
 		defer close(done)
 		for {
-			_, _, err := c.ReadMessage()
+			_, msg, err := c.ReadMessage()
 			if err != nil {
 				return
+			}
+			if *isBinary {
+				os.Stdout.Write(msg)
+			} else {
+				fmt.Fprintln(os.Stdout, string(msg))
 			}
 		}
 	}()
