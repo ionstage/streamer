@@ -218,12 +218,12 @@ func handleClient() {
 				n, err := in.Read(buf)
 				if n > 0 {
 					b := buf[0:n]
+					os.Stdout.Write(b)
 					err := c.WriteMessage(websocket.BinaryMessage, b)
 					if err != nil {
 						fmt.Fprintln(os.Stderr, err)
 						break
 					}
-					os.Stdout.Write(b)
 				}
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
@@ -234,13 +234,13 @@ func handleClient() {
 			scanner := bufio.NewScanner(os.Stdin)
 			for scanner.Scan() {
 				s := scanner.Text()
+				fmt.Println(s)
 				b := unsafe.Slice(unsafe.StringData(s), len(s))
 				err := c.WriteMessage(websocket.TextMessage, b)
 				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					break
 				}
-				fmt.Println(s)
 			}
 		}
 	}()
