@@ -198,6 +198,7 @@ func handleClient() {
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
 				return
 			}
 			if *isBinary {
