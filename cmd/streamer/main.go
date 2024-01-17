@@ -34,11 +34,19 @@ type connection struct {
 	send    chan []byte
 }
 
+func (c *connection) start() {
+	c.handler.register <- c
+	go c.write()
+	go c.read()
+}
+
+func (c *connection) stop() {
+	c.handler.unregister <- c
+	c.conn.Close()
+}
+
 func (c *connection) read() {
-	defer func() {
-		c.handler.unregister <- c
-		c.conn.Close()
-	}()
+	defer c.stop()
 	for {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
@@ -145,9 +153,7 @@ func (h *streamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c := &connection{conn: conn, handler: h, send: make(chan []byte, upgrader.WriteBufferSize)}
-	h.register <- c
-	go c.write()
-	go c.read()
+	c.start()
 }
 
 func handleServer() {
