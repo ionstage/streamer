@@ -51,7 +51,7 @@ func server(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
-func handleListener() {
+func handleServer() {
 	http.HandleFunc("/ws", server)
 	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
@@ -76,7 +76,7 @@ func (c *Closer) Close() {
 	}
 }
 
-func handleSender() {
+func handleClient() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -162,8 +162,8 @@ func main() {
 	flag.Parse()
 
 	if *isClient {
-		handleSender()
+		handleClient()
 	} else {
-		handleListener()
+		handleServer()
 	}
 }
