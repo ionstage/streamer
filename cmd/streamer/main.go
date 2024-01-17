@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -90,31 +91,20 @@ func newStreamHandler() *streamHandler {
 func (h *streamHandler) run() {
 	go func() {
 		if *isBinary {
-			in := bufio.NewReader(os.Stdin)
-			buf := make([]byte, upgrader.WriteBufferSize)
-			for {
-				n, err := in.Read(buf)
-				if n > 0 {
-					b := buf[0:n]
-					os.Stdout.Write(b)
-					for c := range h.connections {
-						select {
-						case c.send <- b:
-						default:
-							delete(h.connections, c)
-							close(c.send)
-						}
+			readBinary(os.Stdin, func(b []byte) error {
+				os.Stdout.Write(b)
+				for c := range h.connections {
+					select {
+					case c.send <- b:
+					default:
+						delete(h.connections, c)
+						close(c.send)
 					}
 				}
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					break
-				}
-			}
+				return nil
+			})
 		} else {
-			scanner := bufio.NewScanner(os.Stdin)
-			for scanner.Scan() {
-				s := scanner.Text()
+			readText(os.Stdin, func(s string) error {
 				fmt.Println(s)
 				b := unsafe.Slice(unsafe.StringData(s), len(s))
 				for c := range h.connections {
@@ -125,7 +115,8 @@ func (h *streamHandler) run() {
 						close(c.send)
 					}
 				}
-			}
+				return nil
+			})
 		}
 	}()
 
@@ -223,36 +214,23 @@ func handleClient() {
 			case <-time.After(time.Second):
 			}
 		}()
+
 		if *isBinary {
-			in := bufio.NewReader(os.Stdin)
-			buf := make([]byte, upgrader.WriteBufferSize)
-			for {
-				n, err := in.Read(buf)
-				if n > 0 {
-					b := buf[0:n]
-					os.Stdout.Write(b)
-					err := c.WriteMessage(websocket.BinaryMessage, b)
-					if err != nil {
-						fmt.Fprintln(os.Stderr, err)
-						break
-					}
-				}
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					break
-				}
+			err := readBinary(os.Stdin, func(b []byte) error {
+				os.Stdout.Write(b)
+				return c.WriteMessage(websocket.BinaryMessage, b)
+			})
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
 			}
 		} else {
-			scanner := bufio.NewScanner(os.Stdin)
-			for scanner.Scan() {
-				s := scanner.Text()
+			err := readText(os.Stdin, func(s string) error {
 				fmt.Println(s)
 				b := unsafe.Slice(unsafe.StringData(s), len(s))
-				err := c.WriteMessage(websocket.TextMessage, b)
-				if err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					break
-				}
+				return c.WriteMessage(websocket.TextMessage, b)
+			})
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
 			}
 		}
 	}()
@@ -269,6 +247,34 @@ func handleClient() {
 			}
 		}
 	}
+}
+
+func readBinary(r io.Reader, callback func([]byte) error) error {
+	in := bufio.NewReader(r)
+	buf := make([]byte, upgrader.WriteBufferSize)
+	for {
+		n, err := in.Read(buf)
+		if n > 0 {
+			err := callback(buf[0:n])
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+}
+
+func readText(r io.Reader, callback func(string) error) error {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		err := callback(scanner.Text())
+		if err != nil {
+			return err
+		}
+	}
+	return scanner.Err()
 }
 
 func main() {
