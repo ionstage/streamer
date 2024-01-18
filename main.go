@@ -155,13 +155,13 @@ func handleServer() {
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }
 
-type Closer struct {
+type connectionCloser struct {
 	mu      sync.Mutex
 	closing bool
 	conn    *websocket.Conn
 }
 
-func (c *Closer) Close() {
+func (c *connectionCloser) Close() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.closing {
@@ -188,7 +188,7 @@ func handleClient() {
 
 	done := make(chan struct{})
 
-	closer := Closer{conn: c}
+	closer := connectionCloser{conn: c}
 
 	go func() {
 		defer close(done)
