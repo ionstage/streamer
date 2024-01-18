@@ -217,6 +217,8 @@ func handleClient() {
 
 		if *isBinary {
 			err := readBinary(os.Stdin, func(b []byte) error {
+				closer.mu.Lock()
+				defer closer.mu.Unlock()
 				os.Stdout.Write(b)
 				return c.WriteMessage(websocket.BinaryMessage, b)
 			})
@@ -225,6 +227,8 @@ func handleClient() {
 			}
 		} else {
 			err := readText(os.Stdin, func(s string) error {
+				closer.mu.Lock()
+				defer closer.mu.Unlock()
 				fmt.Println(s)
 				b := unsafe.Slice(unsafe.StringData(s), len(s))
 				return c.WriteMessage(websocket.TextMessage, b)
