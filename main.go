@@ -161,7 +161,7 @@ type connectionCloser struct {
 	conn    *websocket.Conn
 }
 
-func (c *connectionCloser) Close() {
+func (c *connectionCloser) close() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.closing {
@@ -208,7 +208,7 @@ func handleClient() {
 
 	go func() {
 		defer func() {
-			closer.Close()
+			closer.close()
 			select {
 			case <-done:
 			case <-time.After(time.Second):
@@ -244,7 +244,7 @@ func handleClient() {
 		case <-done:
 			return
 		case <-interrupt:
-			closer.Close()
+			closer.close()
 			select {
 			case <-done:
 			case <-time.After(time.Second):
