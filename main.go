@@ -162,6 +162,11 @@ type client struct {
 	done    chan struct{}
 }
 
+func (c *client) run() {
+	go c.receiveAndWrite()
+	go c.readAndSend()
+}
+
 func (c *client) readAndSend() {
 	defer c.close()
 	if *isBinary {
@@ -237,8 +242,7 @@ func handleClient() {
 	defer conn.Close()
 
 	c := client{conn: conn, done: make(chan struct{})}
-	go c.receiveAndWrite()
-	go c.readAndSend()
+	c.run()
 
 	for {
 		select {
