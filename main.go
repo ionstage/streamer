@@ -155,15 +155,65 @@ func handleServer() {
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }
 
-type connectionCloser struct {
+type client struct {
 	mu      sync.Mutex
 	closing bool
 	conn    *websocket.Conn
+	done    chan struct{}
 }
 
-func (c *connectionCloser) close() {
+func (c *client) readAndSend() {
+	defer c.close()
+	if *isBinary {
+		err := readBinary(os.Stdin, func(b []byte) error {
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			os.Stdout.Write(b)
+			return c.conn.WriteMessage(websocket.BinaryMessage, b)
+		})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	} else {
+		err := readText(os.Stdin, func(s string) error {
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			fmt.Println(s)
+			b := unsafe.Slice(unsafe.StringData(s), len(s))
+			return c.conn.WriteMessage(websocket.TextMessage, b)
+		})
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
+}
+
+func (c *client) receiveAndWrite() {
+	defer close(c.done)
+	for {
+		_, msg, err := c.conn.ReadMessage()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+		if *isBinary {
+			os.Stdout.Write(msg)
+		} else {
+			fmt.Fprintln(os.Stdout, string(msg))
+		}
+	}
+}
+
+func (c *client) close() {
 	c.mu.Lock()
-	defer c.mu.Unlock()
+	defer func() {
+		c.mu.Unlock()
+		select {
+		case <-c.done:
+		case <-time.After(time.Second):
+		}
+	}()
+
 	if c.closing {
 		return
 	}
@@ -179,76 +229,23 @@ func handleClient() {
 	signal.Notify(interrupt, os.Interrupt)
 
 	u := url.URL{Scheme: "ws", Host: "localhost:" + strconv.Itoa(*port), Path: "/_streamer"}
-	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
-	defer c.Close()
+	defer conn.Close()
 
-	done := make(chan struct{})
-
-	closer := connectionCloser{conn: c}
-
-	go func() {
-		defer close(done)
-		for {
-			_, msg, err := c.ReadMessage()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-			if *isBinary {
-				os.Stdout.Write(msg)
-			} else {
-				fmt.Fprintln(os.Stdout, string(msg))
-			}
-		}
-	}()
-
-	go func() {
-		defer func() {
-			closer.close()
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-			}
-		}()
-
-		if *isBinary {
-			err := readBinary(os.Stdin, func(b []byte) error {
-				closer.mu.Lock()
-				defer closer.mu.Unlock()
-				os.Stdout.Write(b)
-				return c.WriteMessage(websocket.BinaryMessage, b)
-			})
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		} else {
-			err := readText(os.Stdin, func(s string) error {
-				closer.mu.Lock()
-				defer closer.mu.Unlock()
-				fmt.Println(s)
-				b := unsafe.Slice(unsafe.StringData(s), len(s))
-				return c.WriteMessage(websocket.TextMessage, b)
-			})
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-		}
-	}()
+	c := client{conn: conn, done: make(chan struct{})}
+	go c.receiveAndWrite()
+	go c.readAndSend()
 
 	for {
 		select {
-		case <-done:
+		case <-c.done:
 			return
 		case <-interrupt:
-			closer.close()
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-			}
+			c.close()
 		}
 	}
 }
