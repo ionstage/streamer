@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -182,7 +183,7 @@ func (s *server) send(b []byte) {
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.Print(err)
 		return
 	}
 	c := newConnection(conn, s)
@@ -223,7 +224,7 @@ func (c *client) readAndSend() {
 			return c.conn.WriteMessage(websocket.BinaryMessage, b)
 		})
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			log.Print(err)
 		}
 	} else {
 		err := readText(os.Stdin, func(t string) error {
@@ -234,7 +235,7 @@ func (c *client) readAndSend() {
 			return c.conn.WriteMessage(websocket.TextMessage, b)
 		})
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			log.Print(err)
 		}
 	}
 }
@@ -244,7 +245,7 @@ func (c *client) receiveAndWrite() {
 	for {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			log.Print(err)
 			return
 		}
 		if *isBinary {
@@ -271,7 +272,7 @@ func (c *client) close() {
 	c.closing = true
 	err := c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.Print(err)
 	}
 }
 
@@ -282,7 +283,7 @@ func handleClient() {
 	u := url.URL{Scheme: "ws", Host: "localhost:" + strconv.Itoa(*port), Path: "/_streamer"}
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		log.Print(err)
 		return
 	}
 	defer conn.Close()
