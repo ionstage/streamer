@@ -30,9 +30,11 @@ var upgrader = &websocket.Upgrader{
 }
 
 type connection struct {
-	conn   *websocket.Conn
-	server *server
-	send   chan []byte
+	mu      sync.Mutex
+	closing bool
+	conn    *websocket.Conn
+	server  *server
+	send    chan []byte
 }
 
 func (c *connection) open() {
@@ -42,6 +44,12 @@ func (c *connection) open() {
 }
 
 func (c *connection) close() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.closing {
+		return
+	}
+	c.closing = true
 	c.server.unregister <- c
 	c.conn.Close()
 }
@@ -58,7 +66,7 @@ func (c *connection) read() {
 }
 
 func (c *connection) write() {
-	defer c.conn.Close()
+	defer c.close()
 	var t int
 	if *isBinary {
 		t = websocket.BinaryMessage
