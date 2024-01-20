@@ -29,6 +29,34 @@ var upgrader = &websocket.Upgrader{
 	},
 }
 
+func readBinary(rd io.Reader, cb func([]byte) error) error {
+	r := bufio.NewReader(rd)
+	b := make([]byte, upgrader.WriteBufferSize)
+	for {
+		n, err := r.Read(b)
+		if n > 0 {
+			err := cb(b[0:n])
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+}
+
+func readText(r io.Reader, cb func(string) error) error {
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		err := cb(s.Text())
+		if err != nil {
+			return err
+		}
+	}
+	return s.Err()
+}
+
 type connection struct {
 	mu      sync.Mutex
 	closing bool
@@ -270,34 +298,6 @@ func handleClient() {
 			c.close()
 		}
 	}
-}
-
-func readBinary(r io.Reader, callback func([]byte) error) error {
-	in := bufio.NewReader(r)
-	buf := make([]byte, upgrader.WriteBufferSize)
-	for {
-		n, err := in.Read(buf)
-		if n > 0 {
-			err := callback(buf[0:n])
-			if err != nil {
-				return err
-			}
-		}
-		if err != nil {
-			return err
-		}
-	}
-}
-
-func readText(r io.Reader, callback func(string) error) error {
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		err := callback(scanner.Text())
-		if err != nil {
-			return err
-		}
-	}
-	return scanner.Err()
 }
 
 func main() {
