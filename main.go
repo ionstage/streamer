@@ -37,6 +37,10 @@ type connection struct {
 	send    chan []byte
 }
 
+func newConnection(c *websocket.Conn, s *server) *connection {
+	return &connection{conn: c, server: s, send: make(chan []byte, upgrader.WriteBufferSize)}
+}
+
 func (c *connection) open() {
 	c.server.register <- c
 	go c.write()
@@ -151,7 +155,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
-	c := &connection{conn: conn, server: s, send: make(chan []byte, upgrader.WriteBufferSize)}
+	c := newConnection(conn, s)
 	c.open()
 }
 
