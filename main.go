@@ -30,30 +30,30 @@ var upgrader = &websocket.Upgrader{
 }
 
 type connection struct {
-	conn    *websocket.Conn
-	handler *streamHandler
-	send    chan []byte
+	conn   *websocket.Conn
+	server *server
+	send   chan []byte
 }
 
-func (c *connection) start() {
-	c.handler.register <- c
+func (c *connection) open() {
+	c.server.register <- c
 	go c.write()
 	go c.read()
 }
 
-func (c *connection) stop() {
-	c.handler.unregister <- c
+func (c *connection) close() {
+	c.server.unregister <- c
 	c.conn.Close()
 }
 
 func (c *connection) read() {
-	defer c.stop()
+	defer c.close()
 	for {
 		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		c.handler.output <- msg
+		c.server.output <- msg
 	}
 }
 
@@ -72,15 +72,15 @@ func (c *connection) write() {
 	}
 }
 
-type streamHandler struct {
+type server struct {
 	connections map[*connection]struct{}
 	register    chan *connection
 	unregister  chan *connection
 	output      chan []byte
 }
 
-func newStreamHandler() *streamHandler {
-	return &streamHandler{
+func newServer() *server {
+	return &server{
 		connections: make(map[*connection]struct{}),
 		register:    make(chan *connection),
 		unregister:  make(chan *connection),
@@ -88,30 +88,30 @@ func newStreamHandler() *streamHandler {
 	}
 }
 
-func (h *streamHandler) run() {
+func (s *server) run() {
 	go func() {
 		if *isBinary {
 			readBinary(os.Stdin, func(b []byte) error {
 				os.Stdout.Write(b)
-				for c := range h.connections {
+				for c := range s.connections {
 					select {
 					case c.send <- b:
 					default:
-						delete(h.connections, c)
+						delete(s.connections, c)
 						close(c.send)
 					}
 				}
 				return nil
 			})
 		} else {
-			readText(os.Stdin, func(s string) error {
-				fmt.Println(s)
-				b := unsafe.Slice(unsafe.StringData(s), len(s))
-				for c := range h.connections {
+			readText(os.Stdin, func(t string) error {
+				fmt.Println(t)
+				b := unsafe.Slice(unsafe.StringData(t), len(t))
+				for c := range s.connections {
 					select {
 					case c.send <- b:
 					default:
-						delete(h.connections, c)
+						delete(s.connections, c)
 						close(c.send)
 					}
 				}
@@ -122,12 +122,12 @@ func (h *streamHandler) run() {
 
 	for {
 		select {
-		case c := <-h.register:
-			h.connections[c] = struct{}{}
-		case c := <-h.unregister:
-			delete(h.connections, c)
+		case c := <-s.register:
+			s.connections[c] = struct{}{}
+		case c := <-s.unregister:
+			delete(s.connections, c)
 			close(c.send)
-		case msg := <-h.output:
+		case msg := <-s.output:
 			if *isBinary {
 				os.Stdout.Write(msg)
 			} else {
@@ -137,18 +137,18 @@ func (h *streamHandler) run() {
 	}
 }
 
-func (h *streamHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
-	c := &connection{conn: conn, handler: h, send: make(chan []byte, upgrader.WriteBufferSize)}
-	c.start()
+	c := &connection{conn: conn, server: s, send: make(chan []byte, upgrader.WriteBufferSize)}
+	c.open()
 }
 
 func handleServer() {
-	handler := newStreamHandler()
+	handler := newServer()
 	go handler.run()
 	http.Handle("/_streamer", handler)
 	http.Handle("/", http.FileServer(http.Dir("./")))
@@ -180,11 +180,11 @@ func (c *client) readAndSend() {
 			fmt.Fprintln(os.Stderr, err)
 		}
 	} else {
-		err := readText(os.Stdin, func(s string) error {
+		err := readText(os.Stdin, func(t string) error {
 			c.mu.Lock()
 			defer c.mu.Unlock()
-			fmt.Println(s)
-			b := unsafe.Slice(unsafe.StringData(s), len(s))
+			fmt.Println(t)
+			b := unsafe.Slice(unsafe.StringData(t), len(t))
 			return c.conn.WriteMessage(websocket.TextMessage, b)
 		})
 		if err != nil {
