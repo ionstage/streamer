@@ -197,14 +197,6 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.open()
 }
 
-func handleServer() {
-	handler := newServer()
-	handler.run()
-	http.Handle("/_streamer", handler)
-	http.Handle("/", http.FileServer(http.Dir("./")))
-	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
-}
-
 type client struct {
 	mu      sync.Mutex
 	closing bool
@@ -280,6 +272,14 @@ func (c *client) close() {
 	if err != nil {
 		log.Print(err)
 	}
+}
+
+func handleServer() {
+	handler := newServer()
+	handler.run()
+	http.Handle("/_streamer", handler)
+	http.Handle("/", http.FileServer(http.Dir("./")))
+	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }
 
 func handleClient() {
