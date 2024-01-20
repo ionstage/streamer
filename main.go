@@ -58,6 +58,14 @@ func readText(r io.Reader, cb func(string) error) error {
 	return s.Err()
 }
 
+func stringToBytes(s string) []byte {
+	return unsafe.Slice(unsafe.StringData(s), len(s))
+}
+
+func bytesToString(b []byte) string {
+	return unsafe.String(&b[0], len(b))
+}
+
 type connection struct {
 	mu      sync.Mutex
 	closing bool
@@ -144,8 +152,7 @@ func (s *server) readAndSend() {
 	} else {
 		readText(os.Stdin, func(t string) error {
 			fmt.Println(t)
-			b := unsafe.Slice(unsafe.StringData(t), len(t))
-			s.send(b)
+			s.send(stringToBytes(t))
 			return nil
 		})
 	}
@@ -163,7 +170,7 @@ func (s *server) receiveAndWrite() {
 			if *isBinary {
 				os.Stdout.Write(msg)
 			} else {
-				fmt.Fprintln(os.Stdout, string(msg))
+				fmt.Println(bytesToString(msg))
 			}
 		}
 	}
@@ -231,8 +238,7 @@ func (c *client) readAndSend() {
 			c.mu.Lock()
 			defer c.mu.Unlock()
 			fmt.Println(t)
-			b := unsafe.Slice(unsafe.StringData(t), len(t))
-			return c.conn.WriteMessage(websocket.TextMessage, b)
+			return c.conn.WriteMessage(websocket.TextMessage, stringToBytes(t))
 		})
 		if err != nil {
 			log.Print(err)
@@ -251,7 +257,7 @@ func (c *client) receiveAndWrite() {
 		if *isBinary {
 			os.Stdout.Write(msg)
 		} else {
-			fmt.Fprintln(os.Stdout, string(msg))
+			fmt.Println(bytesToString(msg))
 		}
 	}
 }
