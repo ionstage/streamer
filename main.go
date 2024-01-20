@@ -174,6 +174,10 @@ type client struct {
 	done    chan struct{}
 }
 
+func newClient(c *websocket.Conn) *client {
+	return &client{conn: c, done: make(chan struct{})}
+}
+
 func (c *client) run() {
 	go c.receiveAndWrite()
 	go c.readAndSend()
@@ -253,7 +257,7 @@ func handleClient() {
 	}
 	defer conn.Close()
 
-	c := client{conn: conn, done: make(chan struct{})}
+	c := newClient(conn)
 	c.run()
 
 	for {
