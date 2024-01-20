@@ -101,37 +101,28 @@ func newServer() *server {
 }
 
 func (s *server) run() {
-	go func() {
-		if *isBinary {
-			readBinary(os.Stdin, func(b []byte) error {
-				os.Stdout.Write(b)
-				for c := range s.connections {
-					select {
-					case c.send <- b:
-					default:
-						delete(s.connections, c)
-						close(c.send)
-					}
-				}
-				return nil
-			})
-		} else {
-			readText(os.Stdin, func(t string) error {
-				fmt.Println(t)
-				b := unsafe.Slice(unsafe.StringData(t), len(t))
-				for c := range s.connections {
-					select {
-					case c.send <- b:
-					default:
-						delete(s.connections, c)
-						close(c.send)
-					}
-				}
-				return nil
-			})
-		}
-	}()
+	go s.receiveAndWrite()
+	go s.readAndSend()
+}
 
+func (s *server) readAndSend() {
+	if *isBinary {
+		readBinary(os.Stdin, func(b []byte) error {
+			os.Stdout.Write(b)
+			s.send(b)
+			return nil
+		})
+	} else {
+		readText(os.Stdin, func(t string) error {
+			fmt.Println(t)
+			b := unsafe.Slice(unsafe.StringData(t), len(t))
+			s.send(b)
+			return nil
+		})
+	}
+}
+
+func (s *server) receiveAndWrite() {
 	for {
 		select {
 		case c := <-s.register:
@@ -149,6 +140,17 @@ func (s *server) run() {
 	}
 }
 
+func (s *server) send(b []byte) {
+	for c := range s.connections {
+		select {
+		case c.send <- b:
+		default:
+			delete(s.connections, c)
+			close(c.send)
+		}
+	}
+}
+
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -161,7 +163,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func handleServer() {
 	handler := newServer()
-	go handler.run()
+	handler.run()
 	http.Handle("/_streamer", handler)
 	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
