@@ -98,11 +98,11 @@ func (c *connection) close() {
 func (c *connection) read() {
 	defer c.close()
 	for {
-		_, msg, err := c.conn.ReadMessage()
+		_, b, err := c.conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		c.server.output <- msg
+		c.server.output <- b
 	}
 }
 
@@ -114,8 +114,8 @@ func (c *connection) write() {
 	} else {
 		t = websocket.TextMessage
 	}
-	for msg := range c.send {
-		if err := c.conn.WriteMessage(t, msg); err != nil {
+	for b := range c.send {
+		if err := c.conn.WriteMessage(t, b); err != nil {
 			break
 		}
 	}
@@ -166,11 +166,11 @@ func (s *server) receiveAndWrite() {
 		case c := <-s.unregister:
 			delete(s.connections, c)
 			close(c.send)
-		case msg := <-s.output:
+		case b := <-s.output:
 			if *isBinary {
-				os.Stdout.Write(msg)
+				os.Stdout.Write(b)
 			} else {
-				fmt.Println(bytesToString(msg))
+				fmt.Println(bytesToString(b))
 			}
 		}
 	}
@@ -241,15 +241,15 @@ func (c *client) readAndSend() {
 func (c *client) receiveAndWrite() {
 	defer close(c.done)
 	for {
-		_, msg, err := c.conn.ReadMessage()
+		_, b, err := c.conn.ReadMessage()
 		if err != nil {
 			log.Print(err)
 			return
 		}
 		if *isBinary {
-			os.Stdout.Write(msg)
+			os.Stdout.Write(b)
 		} else {
-			fmt.Println(bytesToString(msg))
+			fmt.Println(bytesToString(b))
 		}
 	}
 }
@@ -275,9 +275,9 @@ func (c *client) close() {
 }
 
 func handleServer() {
-	handler := newServer()
-	handler.run()
-	http.Handle("/_streamer", handler)
+	s := newServer()
+	s.run()
+	http.Handle("/_streamer", s)
 	http.Handle("/", http.FileServer(http.Dir("./")))
 	http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 }
