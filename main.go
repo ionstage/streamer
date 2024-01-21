@@ -75,7 +75,11 @@ type connection struct {
 }
 
 func newConnection(c *websocket.Conn, s *server) *connection {
-	return &connection{conn: c, server: s, send: make(chan []byte, upgrader.WriteBufferSize)}
+	return &connection{
+		conn:   c,
+		server: s,
+		send:   make(chan []byte, upgrader.WriteBufferSize),
+	}
 }
 
 func (c *connection) open() {
@@ -205,7 +209,10 @@ type client struct {
 }
 
 func newClient(c *websocket.Conn) *client {
-	return &client{conn: c, done: make(chan struct{})}
+	return &client{
+		conn: c,
+		done: make(chan struct{}),
+	}
 }
 
 func (c *client) run() {
