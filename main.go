@@ -126,6 +126,7 @@ func (c *connection) write() {
 }
 
 type server struct {
+	mu          sync.Mutex
 	connections map[*connection]struct{}
 	register    chan *connection
 	unregister  chan *connection
@@ -150,13 +151,17 @@ func (s *server) readAndSend() {
 	if *isBinary {
 		readBinary(os.Stdin, func(b []byte) error {
 			os.Stdout.Write(b)
+			s.mu.Lock()
 			s.send(b)
+			s.mu.Unlock()
 			return nil
 		})
 	} else {
 		readText(os.Stdin, func(t string) error {
 			fmt.Println(t)
+			s.mu.Lock()
 			s.send(stringToBytes(t))
+			s.mu.Unlock()
 			return nil
 		})
 	}
@@ -166,10 +171,13 @@ func (s *server) receiveAndWrite() {
 	for {
 		select {
 		case c := <-s.register:
-			s.connections[c] = struct{}{}
+			s.mu.Lock()
+			s.add(c)
+			s.mu.Unlock()
 		case c := <-s.unregister:
-			delete(s.connections, c)
-			close(c.send)
+			s.mu.Lock()
+			s.delete(c)
+			s.mu.Unlock()
 		case b := <-s.output:
 			if *isBinary {
 				os.Stdout.Write(b)
@@ -180,13 +188,32 @@ func (s *server) receiveAndWrite() {
 	}
 }
 
+func (s *server) add(c *connection) {
+	if s.has(c) {
+		return
+	}
+	s.connections[c] = struct{}{}
+}
+
+func (s *server) delete(c *connection) {
+	if !s.has(c) {
+		return
+	}
+	delete(s.connections, c)
+	close(c.send)
+}
+
+func (s *server) has(c *connection) bool {
+	_, ok := s.connections[c]
+	return ok
+}
+
 func (s *server) send(b []byte) {
 	for c := range s.connections {
 		select {
 		case c.send <- b:
 		default:
-			delete(s.connections, c)
-			close(c.send)
+			s.delete(c)
 		}
 	}
 }
